@@ -6,12 +6,11 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="ossec-config-manager",
     version="0.1.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Cybersilo",
     description="A Python package for managing Wazuh OSSEC configurations",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/ossec-config-manager",
+    url="https://github.com/Hisham-Tariq/ossec-config-manager",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
