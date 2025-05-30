@@ -369,7 +369,12 @@ class ActiveResponseManager(OSSECConfigManager):
             raise ValueError("At least one matching parameter must be provided")
 
         removed = False
-        for ar in self.root.findall('.//active-response'):
+        ossec_config = self.root.find('ossec_config')
+        if ossec_config is None:
+            print("No ossec_config section found in the configuration.")
+            return False
+
+        for ar in ossec_config.findall('active-response'):
             # Check each parameter if provided
             matches = True
             
@@ -402,7 +407,7 @@ class ActiveResponseManager(OSSECConfigManager):
                 matches = matches and ar_rules_id is not None and ar_rules_id.text == rules_id
 
             if matches:
-                self.root.remove(ar)
+                ossec_config.remove(ar)
                 removed = True
                 # Build description of removed response for logging
                 desc_parts = []
