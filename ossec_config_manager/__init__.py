@@ -1,3 +1,4 @@
 from .ossec_config import OSSECConfigManager
+from .active_response import ActiveResponseManager
 
-__all__ = ['OSSECConfigManager'] 
+__all__ = ['OSSECConfigManager', 'ActiveResponseManager'] 
