@@ -336,24 +336,114 @@ class ActiveResponseManager(OSSECConfigManager):
         print(f"No active response found for command '{command}'.")
         return False
 
-    def remove_active_response(self, command: str) -> bool:
+    def remove_active_response(self,
+        command: Optional[str] = None,
+        location: Optional[str] = None,
+        level: Optional[int] = None,
+        timeout: Optional[int] = None,
+        agent_id: Optional[str] = None,
+        rules_group: Optional[str] = None,
+        rules_id: Optional[str] = None
+    ) -> bool:
         """
         Remove an active response from the OSSEC configuration.
+        Matches active responses based on any combination of provided parameters.
+        At least one parameter must be provided.
         
         Args:
-            command (str): Command name of the active response to remove
+            command (Optional[str]): Command name of the active response to remove
+            location (Optional[str]): Location of the active response
+            level (Optional[int]): Level of the active response
+            timeout (Optional[int]): Timeout of the active response
+            agent_id (Optional[str]): Agent ID for defined-agent location
+            rules_group (Optional[str]): Rule group(s) that trigger the response
+            rules_id (Optional[str]): Rule ID(s) that trigger the response
             
         Returns:
             bool: True if active response was removed, False otherwise
+            
+        Raises:
+            ValueError: If no matching parameters are provided
         """
+        if all(param is None for param in [command, location, level, timeout, agent_id, rules_group, rules_id]):
+            raise ValueError("At least one matching parameter must be provided")
+
+        removed = False
         for ar in self.root.findall('.//active-response'):
-            ar_command = ar.find('command')
-            if ar_command is not None and ar_command.text == command:
+            # Check each parameter if provided
+            matches = True
+            
+            if command is not None:
+                ar_command = ar.find('command')
+                matches = matches and ar_command is not None and ar_command.text == command
+                
+            if location is not None:
+                ar_location = ar.find('location')
+                matches = matches and ar_location is not None and ar_location.text == location
+                
+            if level is not None:
+                ar_level = ar.find('level')
+                matches = matches and ar_level is not None and int(ar_level.text) == level
+                
+            if timeout is not None:
+                ar_timeout = ar.find('timeout')
+                matches = matches and ar_timeout is not None and int(ar_timeout.text) == timeout
+                
+            if agent_id is not None:
+                ar_agent_id = ar.find('agent_id')
+                matches = matches and ar_agent_id is not None and ar_agent_id.text == agent_id
+                
+            if rules_group is not None:
+                ar_rules_group = ar.find('rules_group')
+                matches = matches and ar_rules_group is not None and ar_rules_group.text == rules_group
+                
+            if rules_id is not None:
+                ar_rules_id = ar.find('rules_id')
+                matches = matches and ar_rules_id is not None and ar_rules_id.text == rules_id
+
+            if matches:
                 self.root.remove(ar)
-                print(f"Active response for command '{command}' has been removed.")
-                return True
-        print(f"No active response found for command '{command}'.")
-        return False
+                removed = True
+                # Build description of removed response for logging
+                desc_parts = []
+                if command:
+                    desc_parts.append(f"command='{command}'")
+                if location:
+                    desc_parts.append(f"location='{location}'")
+                if level:
+                    desc_parts.append(f"level={level}")
+                if timeout:
+                    desc_parts.append(f"timeout={timeout}")
+                if agent_id:
+                    desc_parts.append(f"agent_id='{agent_id}'")
+                if rules_group:
+                    desc_parts.append(f"rules_group='{rules_group}'")
+                if rules_id:
+                    desc_parts.append(f"rules_id='{rules_id}'")
+                
+                print(f"Active response matching {', '.join(desc_parts)} has been removed.")
+                break
+
+        if not removed:
+            # Build description of search criteria for logging
+            desc_parts = []
+            if command:
+                desc_parts.append(f"command='{command}'")
+            if location:
+                desc_parts.append(f"location='{location}'")
+            if level:
+                desc_parts.append(f"level={level}")
+            if timeout:
+                desc_parts.append(f"timeout={timeout}")
+            if agent_id:
+                desc_parts.append(f"agent_id='{agent_id}'")
+            if rules_group:
+                desc_parts.append(f"rules_group='{rules_group}'")
+            if rules_id:
+                desc_parts.append(f"rules_id='{rules_id}'")
+            
+            print(f"No active response found matching {', '.join(desc_parts)}.")
+        return removed
 
     def active_response_exists(self, command: str) -> bool:
         """

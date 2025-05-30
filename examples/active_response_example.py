@@ -80,7 +80,27 @@ def main():
 
     # Example 9: Remove an active response
     print("\nRemoving active response:")
-    manager.remove_active_response("custom-block")
+    # Remove by command only (original behavior)
+    manager.remove_active_response(command="custom-block")
+    
+    # Remove by multiple parameters
+    manager.remove_active_response(
+        command="host-deny",
+        location="local",
+        level=7,
+        timeout=600
+    )
+    
+    # Remove by rules group
+    manager.remove_active_response(
+        rules_group="authentication_failure,"
+    )
+    
+    # Remove by location and level
+    manager.remove_active_response(
+        location="local",
+        level=12
+    )
 
     # Example 10: Save changes
     print("\nSaving changes:")
