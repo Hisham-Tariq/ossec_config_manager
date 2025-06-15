@@ -1,18 +1,29 @@
 # OSSEC Config Manager
 
-A Python package for managing Wazuh OSSEC configurations. This package provides a simple and efficient way to manage OSSEC configuration files programmatically.
+A Python package for managing Wazuh OSSEC configurations.
 
 ## Features
 
-- Parse and modify OSSEC configuration files
-- Manage integrations
-- Update XML blocks
-- Insert and delete configuration elements
+- Manage OSSEC integrations
+- Update configuration sections
 - Backup and restore configurations
+- Debian package support
 
 ## Installation
 
-You can install the package using pip:
+### From Debian Package
+
+1. Build the Debian package:
+```bash
+./build_deb.sh
+```
+
+2. Install the package:
+```bash
+sudo apt install ./python3-ossec-config-manager_*.deb
+```
+
+### From GitHub
 
 ```bash
 pip install git+https://github.com/yourusername/ossec-config-manager.git
@@ -23,31 +34,46 @@ pip install git+https://github.com/yourusername/ossec-config-manager.git
 ```python
 from ossec_config_manager import OSSECConfigManager
 
-# Initialize the manager with your OSSEC config file
-manager = OSSECConfigManager('/path/to/ossec.conf')
+# Initialize the manager
+manager = OSSECConfigManager()
 
-# Read integrations
-integrations = manager.read_ossec_integrations()
+# Get all integrations
+integrations = manager.get_integrations()
 
 # Add a new integration
-new_integration = {
-    'name': 'slack',
-    'hook_url': 'https://hooks.slack.com/services/...',
-    'level': '12'
-}
-manager.insert_ossec_integration(new_integration)
+manager.add_integration('slack', {
+    'webhook_url': 'https://hooks.slack.com/services/...',
+    'channel': '#alerts'
+})
 
-# Update a configuration block
-updates = {
-    'enabled': 'yes',
-    'interval': '1h'
-}
-manager.update_xml_block('ossec_config/vulnerability-detection', updates)
+# Update a configuration section
+manager.update_section('global', {
+    'email_notification': 'yes',
+    'email_to': 'admin@example.com'
+})
 
-# Save changes
-manager.save_tree()
+# Save changes with backup
+manager.save_changes(backup=True)
 ```
+
+## Build Process
+
+The `build_deb.sh` script automates the Debian package creation process:
+
+1. Checks for required build tools
+2. Installs missing dependencies
+3. Updates the changelog
+4. Cleans previous build artifacts
+5. Builds the package
+6. Provides installation instructions
+
+### Build Artifacts
+
+- `python3-ossec-config-manager_*.deb`: The Debian package
+- `python3-ossec-config-manager_*.dsc`: Package description
+- `python3-ossec-config-manager_*.tar.gz`: Source tarball
+- `python3-ossec-config-manager_*.changes`: Package changes
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License. 
